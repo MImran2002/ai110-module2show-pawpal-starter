@@ -32,6 +32,30 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+### Testing PawPal+
+
+Run the full test suite:
+
+```bash
+python -m pytest tests/ -v
+```
+
+**Coverage (15 tests):**
+
+| Area | Tests |
+|---|---|
+| Task basics | completion flag, task addition to pet |
+| Sorting | ascending duration order, schedule not mutated |
+| Recurrence | daily → tomorrow, weekly → +7 days, as-needed → None, `isDueToday()` before/after |
+| Edge cases | pet with no tasks, owner with no pets, tasks exceeding budget are excluded |
+| Conflict detection | no false positives on clean schedule |
+| Filtering | `filterByPet()` by name, `filterByStatus()` for pending tasks |
+
+**Confidence level: ★★★★☆**
+Core scheduling, sorting, recurrence, and filtering are fully verified. The conflict detection uses a simplified sequential-offset model (see `reflection.md` section 2b) which can produce false positives in real-world multi-pet scenarios — that edge case is not yet covered by automated tests.
+
+---
+
 ### Suggested workflow
 
 1. Read the scenario carefully and identify requirements and edge cases.
