@@ -91,8 +91,11 @@
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+The conflict-detection algorithm assigns each scheduled task a time slot by accumulating start offsets in the order tasks appear in `_schedule` (sorted by priority). Two tasks for the same pet are placed back-to-back on a single shared timeline rather than being given independent parallel windows.
+
+The tradeoff is **realism vs. simplicity**. In a real calendar a pet owner might walk Buddy at 8 AM and give flea medication at 9 AM — two events that never truly overlap. The sequential-offset model has no concept of clock time, so it can report an overlap whenever two same-pet tasks share any portion of that artificial timeline, producing false-positive warnings in realistic usage.
+
+This tradeoff is still reasonable because: (1) it requires no external calendar dependency, (2) it catches the genuinely problematic case where two tasks for the same pet are double-booked beyond the owner's time budget, and (3) the public API of `detectConflicts()` can be upgraded to real datetime slot assignment later without breaking callers.
 
 ---
 

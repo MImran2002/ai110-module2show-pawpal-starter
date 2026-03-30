@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import date, timedelta
 from typing import Optional
 
 PRIORITY_ORDER = {"high": 0, "medium": 1, "low": 2}
@@ -14,10 +15,22 @@ class Task:
     frequency: str         # "daily" | "weekly" | "as-needed"
     priority: str          # "high" | "medium" | "low"
     isCompleted: bool = field(default=False)
+    next_due: Optional[date] = field(default=None)
 
     def markComplete(self) -> None:
-        """Mark this task as done."""
+        """Mark this task as done and set next_due based on frequency."""
         self.isCompleted = True
+        today = date.today()
+        if self.frequency == "daily":
+            self.next_due = today + timedelta(days=1)
+        elif self.frequency == "weekly":
+            self.next_due = today + timedelta(weeks=1)
+        else:
+            self.next_due = None
+
+    def isDueToday(self) -> bool:
+        """Return True if next_due is None or on/before today."""
+        return self.next_due is None or self.next_due <= date.today()
 
     def reset(self) -> None:
         """Reset completion status for a new day."""
@@ -176,3 +189,56 @@ class Scheduler:
     def getSummary(self) -> str:
         """Return a one-line summary of the generated plan."""
         return self._summary
+
+    def sortByDuration(self) -> list:
+        """Return the scheduled tasks sorted ascending by duration in minutes."""
+        return sorted(self._schedule, key=lambda t: t.duration)
+
+    def filterByStatus(self, completed: bool) -> list:
+        """Return all tasks across every pet matching the given completion status."""
+        return [
+            task
+            for pet in self.owner.getPets()
+            for task in pet.getTasks()
+            if task.isCompleted == completed
+        ]
+
+    def filterByPet(self, pet_name: str) -> list:
+        """Return all tasks for the pet whose name matches pet_name (case-insensitive)."""
+        for pet in self.owner.getPets():
+            if pet.name.lower() == pet_name.lower():
+                return pet.getTasks()
+        return []
+
+    def detectConflicts(self) -> list:
+        """Detect overlapping time slots among scheduled tasks grouped by pet; returns warning strings."""
+        # Build pet_name -> list of (start, end, task) using sequential offsets
+        pet_slots: dict = {}
+        offset = 0
+        for task in self._schedule:
+            owner_pet_name = None
+            for pet in self.owner.getPets():
+                if task in pet.getTasks():
+                    owner_pet_name = pet.name
+                    break
+            start = offset
+            end = offset + task.duration
+            offset = end
+            if owner_pet_name not in pet_slots:
+                pet_slots[owner_pet_name] = []
+            pet_slots[owner_pet_name].append((start, end, task))
+
+        # Check every pair within the same pet for overlap
+        warnings = []
+        for pet_name, slots in pet_slots.items():
+            for i in range(len(slots)):
+                for j in range(i + 1, len(slots)):
+                    a_start, a_end, task_a = slots[i]
+                    b_start, b_end, task_b = slots[j]
+                    if a_start < b_end and b_start < a_end:
+                        warnings.append(
+                            f"CONFLICT ({pet_name}): '{task_a.description}' "
+                            f"[{a_start}–{a_end} min] overlaps with "
+                            f"'{task_b.description}' [{b_start}–{b_end} min]."
+                        )
+        return warnings
