@@ -11,6 +11,8 @@
 - For the class Constraints the attributes are availableTime, preferredTimeSlots, blockedTimes; method: grtAvailableTime, isTimeAvailable.
 - For the class Plan the attributes are owner ( an object with User class), date, scheduledTasks ( an object from Task class), totalDuration, reasoning; method: generatePlan, addTask, removeTask, getReasoning, displayPlan.
 
+**Final UML (updated to match implementation):**
+
    classDiagram
     class User {
         +String name
@@ -36,44 +38,49 @@
     }
 
     class Task {
-        +String name
+        +String description
         +int duration
+        +String frequency
         +String priority
-        +String category
-        +Pet pet
         +bool isCompleted
+        +date next_due
+        +markComplete() void
+        +reset() void
+        +isDue() bool
+        +isDueToday() bool
         +getDuration() int
         +getPriority() String
-        +getCategory() String
-        +markComplete() void
     }
 
-    class Constraints {
-        +int availableTime
-        +List preferredTimeSlots
-        +List blockedTimes
-        +getAvailableTime() int
-        +isTimeAvailable(slot) bool
+    class Owner {
+        +String name
+        +int available_time
+        -List~Pet~ _pets
+        +addPet(pet) void
+        +getPets() List
+        +getAllTasks() List
     }
 
-    class Plan {
-        +User owner
-        +String date
-        +List~Task~ scheduledTasks
-        +int totalDuration
-        +String reasoning
-        +generatePlan(tasks, constraints) void
-        +addTask(task) void
-        +removeTask(task) void
+    class Scheduler {
+        +Owner owner
+        -List _schedule
+        -List _excluded
+        -String _reasoning
+        -String _summary
+        +generatePlan() void
+        +getSchedule() List
         +getReasoning() String
-        +displayPlan() void
+        +getSummary() String
+        +sortByDuration() List
+        +filterByStatus(completed) List
+        +filterByPet(pet_name) List
+        +detectConflicts() List
     }
 
-    User "1" --> "many" Pet : owns
-    User "1" --> "1" Constraints : has
+    Owner "1" --> "many" Pet : owns
     Pet "1" --> "many" Task : has
-    Plan "1" --> "1" User : belongs to
-    Plan "1" --> "many" Task : schedules 
+    Scheduler "1" --> "1" Owner : plans for
+    Scheduler "1" --> "many" Task : schedules
 
 **b. Design changes**
 
