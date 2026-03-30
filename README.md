@@ -35,7 +35,7 @@ Your job is to design the system first (UML), then implement the logic in Python
 
 ## 📸 Demo
 
-<a href="/course_images/ai110/your_screenshot_name.png" target="_blank"><img src='/course_images/ai110/your_screenshot_name.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>
+<a href="/Users/imran/Desktop/codepath/ai110-pawpal/ai110-module2show-pawpal-starter/Screenshot 2026-03-29 at 11.47.16 PM.png" target="_blank"><img src='/Users/imran/Desktop/codepath/ai110-pawpal/ai110-module2show-pawpal-starter/Screenshot 2026-03-29 at 11.47.16 PM.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>
 
 ---
 
